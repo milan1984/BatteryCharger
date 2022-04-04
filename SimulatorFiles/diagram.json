@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-nano", "id": "nano", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -215.87,
+      "left": 51.67,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": -216.54,
+      "left": 1.67,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 146.8,
+      "left": 3,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 147.46,
+      "left": 102.33,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 276.13,
+      "left": -83,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 274.8,
+      "left": 45.67,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -216.80142704283932,
+      "left": -302.80000317034444,
+      "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "pot1",
+      "top": 258.15,
+      "left": -417.79,
+      "attrs": { "travelLength": "30" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led3",
+      "top": -166.58,
+      "left": -711.43,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "pot2",
+      "top": 407.55,
+      "left": 152,
+      "attrs": { "travelLength": "30" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn3",
+      "top": 147.99,
+      "left": 228.07,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r3",
+      "top": 283.62,
+      "left": 244.35,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    }
+  ],
+  "connections": [
+    [ "nano:GND.2", "led2:C", "black", [ "v-24.93", "h-106.3" ] ],
+    [ "led2:C", "led1:C", "green", [ "v17.08", "h51.33" ] ],
+    [ "led1:A", "nano:7", "green", [ "v140.41", "h-8.67" ] ],
+    [ "led2:A", "nano:8", "green", [ "v158.41", "h30" ] ],
+    [ "btn1:1.r", "btn2:1.l", "green", [ "v0" ] ],
+    [ "btn2:1.l", "nano:5V", "green", [ "h0.67", "v-69.92", "h50.67" ] ],
+    [ "btn2:2.r", "nano:4", "green", [ "h35.67", "v-195.59", "h-98" ] ],
+    [ "btn1:2.l", "nano:5", "green", [ "h-107.33", "v-222.26", "h9.33" ] ],
+    [ "r1:2", "r2:2", "green", [ "h0" ] ],
+    [ "r2:2", "nano:GND.1", "green", [ "h137.66", "v-205.6", "h-69.33" ] ],
+    [ "r2:1", "btn2:2.r", "green", [ "h92.33", "v-11.26" ] ],
+    [ "btn1:2.l", "r1:1", "green", [ "h0" ] ],
+    [ "lcd1:SCL", "nano:A5", "green", [ "h-9.34", "v259.39", "h399.3" ] ],
+    [ "lcd1:SDA", "nano:A4", "green", [ "h-24.45", "v261.87", "h413.25" ] ],
+    [ "lcd1:VCC", "nano:5V", "red", [ "h-76.06", "v290.73", "h503.07" ] ],
+    [ "lcd1:GND", "nano:GND.1", "black", [ "h-116.08", "v316.24", "h45.19" ] ],
+    [ "pot1:VCC", "lcd1:VCC", "red", [ "h-66.31", "v-470.55" ] ],
+    [ "pot1:SIG", "nano:A0", "green", [ "h-53.4", "v274.18", "h442.93", "v-514.12", "h75.3" ] ],
+    [ "pot1:GND", "nano:GND.1", "black", [ "v-179.23", "h345.62" ] ],
+    [ "led3:A", "nano:9", "green", [ "v118.46", "h730.74" ] ],
+    [ "led3:C", "pot1:GND", "green", [ "v379.63", "h417.51" ] ],
+    [ "pot2:VCC", "pot1:VCC", "red", [ "h-566.9", "v-180.95" ] ],
+    [ "pot1:GND", "pot2:GND", "black", [ "v87.73", "h462.72" ] ],
+    [ "pot2:SIG", "nano:A1", "green", [ "h-128.72", "v-380.7", "h72.35" ] ],
+    [ "btn2:1.l", "btn3:1.l", "green", [ "h3.24", "v-14.96", "h122.11" ] ],
+    [ "r3:2", "r2:2", "green", [ "h-193.8", "v19.6" ] ],
+    [ "btn3:2.r", "r3:1", "green", [ "h30.66", "v69.82" ] ],
+    [ "nano:6", "btn3:2.r", "green", [ "v-23.03", "h231.72", "v191.58" ] ]
+  ]
+}
