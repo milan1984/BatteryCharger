@@ -123,7 +123,7 @@ void change_charger_mode(void)
         break;
     case ENDING_CHARGE:
 
-        if (charging_over)
+        if (charging_over) /////////=========TODO : PAUSE FROM THIS MODE ====================================
         {
             state_of_charger = CHARGE_OVER;
         }
@@ -468,6 +468,6 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
 //SW verison message
 void version_message(void)
 {  
-     String version = "Software version 0.2";
+    String version = "Software version 0.3";
     Serial.println(version);
 }
