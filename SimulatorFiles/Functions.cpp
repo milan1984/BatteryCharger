@@ -59,9 +59,9 @@ void set_IO(void)
 
 { //========= INPUT pins ============
     pinMode(VOLTAGE_PIN, INPUT);
-    pinMode(OK_PIN, INPUT);
-    pinMode(DWN_PIN, INPUT);
-    pinMode(UP_PIN, INPUT);
+    pinMode(OK_PIN, INPUT_PULLUP);
+    pinMode(DWN_PIN, INPUT_PULLUP);
+    pinMode(UP_PIN, INPUT_PULLUP);
     // ======== OUT pins ===========
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
@@ -79,9 +79,9 @@ void set_LCD_and_comms(void)
 // Read state of the switches and other inputs
 void read_inputs(void)
 {
-    ok_switch = digitalRead(OK_PIN);
-    UP_switch = digitalRead(UP_PIN);
-    DWN_switch = digitalRead(DWN_PIN);
+    ok_switch = !digitalRead(OK_PIN);
+    UP_switch = !digitalRead(UP_PIN);
+    DWN_switch = !digitalRead(DWN_PIN);
 
     ok_pressed = e1.fTrigDebounce(ok_switch, SW_DEBOUNCE_TIME);
     up_pressed = e2.fTrigDebounce(UP_switch, SW_DEBOUNCE_TIME);
@@ -468,6 +468,6 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
 //SW verison message
 void version_message(void)
 {  
-     String version = "Software version 0.1";
+     String version = "Software version 0.2";
     Serial.println(version);
 }

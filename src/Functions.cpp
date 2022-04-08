@@ -18,7 +18,7 @@ LCDTextScreen lcd(0x27, 16, 2);
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 #define rs 12
-#define en 11
+#define en 11 
 #define d4 5
 #define d5 4
 #define d6 3
@@ -52,14 +52,16 @@ int seconds, hours, minutes;
 int remaining_hours = 0; // time left until the end of charge - in hours
 int remaining_min = 0;   // time left until the end of charge - in min
 int remaining_sec = 0;   // time left until the end of charge - in sec
+
+bool time_ok = false; //flag time set ok
 // Set IO pins
 void set_IO(void)
 
 { //========= INPUT pins ============
     pinMode(VOLTAGE_PIN, INPUT);
-    pinMode(OK_PIN, INPUT);
-    pinMode(DWN_PIN, INPUT);
-    pinMode(UP_PIN, INPUT);
+    pinMode(OK_PIN, INPUT_PULLUP);
+    pinMode(DWN_PIN, INPUT_PULLUP);
+    pinMode(UP_PIN, INPUT_PULLUP);
     // ======== OUT pins ===========
     pinMode(LED_RED, OUTPUT);
     pinMode(LED_GREEN, OUTPUT);
@@ -70,16 +72,16 @@ void set_IO(void)
 void set_LCD_and_comms(void)
 {
     Serial.begin(115200);
-    // lcd.LiquidCrystal_I2C()
-    lcd.LCD_init();
+   // lcd.LiquidCrystal_I2C()
+   lcd.LCD_init();
 }
 
 // Read state of the switches and other inputs
 void read_inputs(void)
 {
-    ok_switch = digitalRead(OK_PIN);
-    UP_switch = digitalRead(UP_PIN);
-    DWN_switch = digitalRead(DWN_PIN);
+    ok_switch = !digitalRead(OK_PIN);
+    UP_switch = !digitalRead(UP_PIN);
+    DWN_switch = !digitalRead(DWN_PIN);
 
     ok_pressed = e1.fTrigDebounce(ok_switch, SW_DEBOUNCE_TIME);
     up_pressed = e2.fTrigDebounce(UP_switch, SW_DEBOUNCE_TIME);
@@ -94,7 +96,7 @@ void change_charger_mode(void)
     switch (state_of_charger)
     {
     case STOP:
-        if (ok_pressed && settings_ok)
+        if (ok_pressed && settings_ok && time_ok)
         {
             state_of_charger = RUNNING; // Go to running mode
         }
@@ -121,7 +123,7 @@ void change_charger_mode(void)
         break;
     case ENDING_CHARGE:
 
-        if (charging_over)
+        if (charging_over) /////////=========TODO : PAUSE FROM THIS MODE ====================================
         {
             state_of_charger = CHARGE_OVER;
         }
@@ -158,7 +160,7 @@ void led_handler(void)
     switch (state_of_charger)
     {
     case STOP: // Only red led  working
-        digitalWrite(LED_RED, true);
+        digitalWrite(LED_RED, false);
         digitalWrite(LED_GREEN, false);
         break;
     case RUNNING: // Only green led only working
@@ -169,7 +171,9 @@ void led_handler(void)
         digitalWrite(LED_RED, false);
         digitalWrite(LED_GREEN, led_pulse);
         break;
-    case ENDING_CHARGE: //==============================================TO DO ==============
+    case ENDING_CHARGE: 
+         digitalWrite(LED_RED, led_pulse);
+        digitalWrite(LED_GREEN, true);
         break;
     case CHARGE_OVER: // Charge over, bouth leds are blinking alternately
         digitalWrite(LED_RED, !led_pulse);
@@ -187,17 +191,17 @@ void lcd_handler(void)
     bool pulseForTextChange = t3.on_off_Timer(true, 2500);
     int static speed_time = 100;
 
-    bool speed_up_1 = t4.impulsTimer(t4.delayOn(UP_switch || DWN_switch, speed_time), speed_time); // speed up 1 variable
-    bool speed_up_2 = t5.impulsTimer(t5.delayOn(UP_switch || DWN_switch, 3000), 100);              // speed up 2 variable
+    bool speed_up_1 = t4.impulsTimer(t4.delayOn(UP_switch || DWN_switch, speed_time), speed_time);   // speed up 1 variable
+    bool speed_up_2 = t5.impulsTimer(t5.delayOn(UP_switch || DWN_switch, 3000),100); // speed up 2 variable
     if (speed_up_2)
-    {
+    {   
         speed_time = speed_time - 10;
     }
     else if (!UP_switch && !DWN_switch)
     {
         speed_time = 100;
     }
-    speed_time = constrain(speed_time, 1, 100);
+    speed_time = constrain(speed_time,1,100) ;
 
     //=====================================================
     String char_for_settings = " ";
@@ -259,24 +263,26 @@ void lcd_handler(void)
                 break;
             case SET_CHARGING_TIME: // Set charging timr value
 
-                if (up_pressed || (speed_up_1 && UP_switch))
+                 if (up_pressed ||(speed_up_1 && UP_switch))
                 {
                     minutes++; // value up
-                               // Serial.print("up");
-                    // Serial.println(minutes);
+                    // Serial.print("up");
+                     //Serial.println(minutes);
+
                 }
                 else if (dwn_pressed || (speed_up_1 && DWN_switch))
                 {
                     minutes--; // value dwn
                     // Serial.print("dwn");
-                    // Serial.println(minutes);
+                   // Serial.println(minutes);
+
                 }
 
-                if (minutes > 59)
+                if(minutes >59)
                 {
                     hours++;
                 }
-                else if (minutes < 0)
+                else if  (minutes <0)
                 {
                     hours--;
                 }
@@ -294,8 +300,15 @@ void lcd_handler(void)
 
                 break;
             case SET_OK:
+                if(time_ok)
+                {
                 settings_ok = true;
                 lcd.LCD_write(F("Podeseno!Stisni"), F("OK za start"));
+                }
+                else
+                {
+                    lcd.LCD_write(F("Vreme mora biti"), F("vece od 1min!"));
+                }
                 break;
             }
         }
@@ -318,7 +331,7 @@ void lcd_handler(void)
         }
         else
         {
-            lcd.LCD_write(F("Pritisni CANCEL"), F("taster za nazad"));
+            lcd.LCD_write(F("Pritisni < ili >"), F("taster za nazad"));
         }
         setting_menu = MAIN_MENU;
         break;
@@ -329,7 +342,7 @@ void lcd_handler(void)
         }
         else
         {
-            lcd.LCD_write("Napon Vc=" + String(cell_voltage) + "V", "Vreme=" + String(remaining_hours) + ":" + String(remaining_min) + ":" + String(remaining_sec));
+            lcd.LCD_write("Napon Vc=" + String(cell_voltage) + "V", "Vreme=" + String(remaining_hours) + ":" + String(remaining_min)+ ":" + String(remaining_sec));
         }
         break;
     default:
@@ -343,35 +356,43 @@ void calculate_charge_time(void)
     unsigned long remaining_milisec;
     unsigned long current_time = millis(); // Current time
     static int last_State = state_of_charger;
-
+   
     total_charge_time = hours * 3600000 + minutes * 60000; // convert hours and min to milisec
+
+    if (total_charge_time > 59000) //set time is > of 1 sec
+    {
+        time_ok = true;
+    }
+    else
+    {
+       time_ok = false;
+    }
 
     if (state_of_charger == RUNNING || state_of_charger == ENDING_CHARGE)
     {
         remaining_milisec = total_charge_time - (millis() - starting_charge_time);
+
     }
     else
     {
         remaining_milisec = 0;
     }
-     
-     //Value chosen to be 1 hour, 1 minute, 1 second, and 1 millisecond
-remaining_milisec = 3661001;
+    
+
+
 //3600000 milliseconds in an hour
-hours = remaining_milisec / 3600000;
-remaining_milisec = remaining_milisec - 3600000 * hours;
+remaining_hours = remaining_milisec / 3600000;
+remaining_milisec = remaining_milisec - 3600000 * remaining_hours;
 //60000 milliseconds in a minute
-minutes = remaining_milisec / 60000;
-remaining_milisec = remaining_milisec - 60000 * minutes;
+remaining_min = remaining_milisec / 60000;
+remaining_milisec = remaining_milisec - 60000 * remaining_min;
 
 //1000 milliseconds in a second
 remaining_sec = remaining_milisec / 1000;
 remaining_milisec = remaining_milisec - 1000 * remaining_sec;
 
-
-
-    // Debug remaining time
-    // Serial.println((String)remaining_hours + ":" + (String)remaining_min + ":" + (String)remaining_sec); // Dubug
+      //Debug remaining time
+   // Serial.println((String)remaining_hours + ":" + (String)remaining_min + ":" + (String)remaining_sec); // Dubug
     if (state_of_charger == STOP)
     {
         // Reset all times
@@ -443,9 +464,10 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-// SW verison message
+
+//SW verison message
 void version_message(void)
-{
-    String version = "\"BatteryCharger\" GITHub, Software version 0.1";
+{  
+    String version = "Software version 0.3";
     Serial.println(version);
 }
