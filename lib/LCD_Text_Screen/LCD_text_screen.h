@@ -1,7 +1,7 @@
 #ifndef LCD_H
 #define LCD_H
 
-//#define LCD_I2C //Comment this if you are using "clasic" lcd 16x2 in 4 pin mode
+#define LCD_I2C //Comment this if you are using "clasic" lcd 16x2 in 4 pin mode
 
 #include "Arduino.h"
 #ifdef LCD_I2C
